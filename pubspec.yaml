@@ -14,6 +14,7 @@ dependencies:
   flutter_bloc: ^9.1.1
   # Dependency Injection
   get_it: ^8.0.3
+  flutter_screenutil: ^5.9.3
   # Functional Programming
   dartz: ^0.10.1
   # Equality
@@ -22,6 +23,7 @@ dependencies:
   supabase_flutter: ^2.16.0
   # Routing
   go_router: ^16.3.0
+  carousel_slider: ^5.1.1
   # Environment
   flutter_dotenv: ^5.2.1
   # Local Storage
@@ -38,6 +40,8 @@ flutter:
   uses-material-design: true
   assets:
     - .env
+    - assets/images/
+
   fonts:
     - family: Cairo
       fonts:
