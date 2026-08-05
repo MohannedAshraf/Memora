@@ -11,6 +11,8 @@ class AppTextField extends StatelessWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final Widget? prefixIcon;
+  final int maxLines;
+  final int? minLines;
 
   const AppTextField({
     super.key,
@@ -21,6 +23,8 @@ class AppTextField extends StatelessWidget {
     this.obscureText = false,
     this.suffixIcon,
     this.prefixIcon,
+    this.maxLines = 1,
+    this.minLines,
   });
 
   @override

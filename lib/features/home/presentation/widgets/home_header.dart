@@ -3,21 +3,42 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:memora/core/theme/app-colors.dart';
 
 class HomeHeader extends StatelessWidget {
-  const HomeHeader({super.key, required this.userName});
+  const HomeHeader({
+    super.key,
+    required this.userName,
+    required this.onMenuTap,
+  });
 
   final String userName;
+  final VoidCallback onMenuTap;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        /// Menu
+        Container(
+          height: 46.w,
+          width: 46.w,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(14.r),
+          ),
+          child: IconButton(
+            onPressed: onMenuTap,
+            icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary),
+          ),
+        ),
+
+        SizedBox(width: 14.w),
+
+        /// Welcome Text
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hello, $userName 👋',
+                'Hello, $userName',
                 style: TextStyle(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.bold,
@@ -36,6 +57,7 @@ class HomeHeader extends StatelessWidget {
           ),
         ),
 
+        /// Notification
         Container(
           height: 46.w,
           width: 46.w,
@@ -45,21 +67,6 @@ class HomeHeader extends StatelessWidget {
           ),
           child: const Icon(
             Icons.notifications_none_rounded,
-            color: AppColors.textPrimary,
-          ),
-        ),
-
-        SizedBox(width: 12.w),
-
-        Container(
-          height: 46.w,
-          width: 46.w,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(14.r),
-          ),
-          child: const Icon(
-            Icons.person_outline_rounded,
             color: AppColors.textPrimary,
           ),
         ),

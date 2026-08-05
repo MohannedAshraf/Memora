@@ -6,17 +6,17 @@ class AlbumCard extends StatelessWidget {
   const AlbumCard({
     super.key,
     required this.title,
-    required this.coverUrl,
-    required this.photosCount,
-    required this.membersCount,
+    // required this.coverUrl,
+    // required this.photosCount,
+    // required this.membersCount,
     required this.updatedAt,
     this.onTap,
   });
 
   final String title;
-  final String coverUrl;
-  final int photosCount;
-  final int membersCount;
+  // final String coverUrl;
+  // final int photosCount;
+  // final int membersCount;
   final String updatedAt;
   final VoidCallback? onTap;
 
@@ -40,8 +40,10 @@ class AlbumCard extends StatelessWidget {
               child: SizedBox(
                 height: 165.h,
                 width: double.infinity,
-                child: coverUrl.isEmpty
-                    ? Container(
+                 child: 
+                // coverUrl.isEmpty ?
+                
+                 Container(
                         color: AppColors.surface,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -62,7 +64,7 @@ class AlbumCard extends StatelessWidget {
                           ],
                         ),
                       )
-                    : Image.network(coverUrl, fit: BoxFit.cover),
+                   // : Image.network(coverUrl, fit: BoxFit.cover),
               ),
             ),
 
@@ -85,7 +87,8 @@ class AlbumCard extends StatelessWidget {
                     ),
 
                     Text(
-                      "$photosCount Photos • $membersCount Members",
+                      "Private Album",
+                     // "$photosCount Photos • $membersCount Members",
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: AppColors.textSecondary,
