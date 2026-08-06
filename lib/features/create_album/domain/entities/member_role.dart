@@ -1,0 +1,1 @@
+enum MemberRole { viewer, editor }

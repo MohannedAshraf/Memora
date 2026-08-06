@@ -14,24 +14,23 @@ class InvitedAlbumsRemoteDataSourceImpl
   Future<List<InvitedAlbumModel>> getInvitedAlbums() async {
     final user = client.auth.currentUser!;
 
-    final members = await client
-        .from("album_members")
-        .select("album_id, role")
-        .eq("user_id", user.id);
+    final invitations = await client
+        .from("album_invitations")
+        .select("album_id")
+        .eq("invited_user", user.id)
+        .eq("status", "accepted");
 
-    final albumIds = members
-        .where((e) => e["role"] != "owner")
-        .map((e) => e["album_id"])
-        .toList();
+    final albumIds = invitations.map((e) => e["album_id"]).toList();
 
-    if (albumIds.isEmpty) {
+   if (albumIds.isEmpty) {
       return [];
     }
 
     final response = await client
         .from("albums")
         .select()
-        .inFilter("id", albumIds);
+        .inFilter("id", albumIds)
+        .order("updated_at", ascending: false);
 
     return (response as List)
         .map((e) => InvitedAlbumModel.fromJson(e))

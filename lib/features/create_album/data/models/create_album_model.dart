@@ -5,7 +5,7 @@ class CreateAlbumModel extends CreateAlbumEntity {
     required super.title,
     required super.description,
     required super.coverImage,
-    required super.invitedEmails,
+    required super.invitations,
   });
 
   factory CreateAlbumModel.fromEntity(CreateAlbumEntity entity) {
@@ -13,7 +13,7 @@ class CreateAlbumModel extends CreateAlbumEntity {
       title: entity.title,
       description: entity.description,
       coverImage: entity.coverImage,
-      invitedEmails: entity.invitedEmails,
+      invitations: entity.invitations,
     );
   }
 }

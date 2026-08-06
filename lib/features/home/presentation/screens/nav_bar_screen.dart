@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,7 +9,6 @@ import 'package:memora/features/albums/presentation/bloc/albums_cubit.dart';
 import 'package:memora/features/albums/presentation/bloc/invited_album_cubit.dart';
 import 'package:memora/features/create_album/presentation/bloc/create_album_cubit.dart';
 import 'package:memora/features/home/presentation/widgets/app_drawer.dart';
-
 
 import '../../../albums/presentation/screens/albums_screen.dart';
 import '../../../create_album/presentation/screens/create_album_screen.dart';
@@ -29,30 +30,32 @@ class _NavBarScreenState extends State<NavBarScreen> {
 
   DateTime? lastBackPressed;
 
-  final List<Widget> tabs = [
-   MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => sl<AlbumsCubit>()..getMyAlbums()),
-
-        BlocProvider(
-          create: (_) => sl<InvitedAlbumsCubit>()..getInvitedAlbums(),
-        ),
-      ],
-      child: const HomeScreen(),
-    ),
-    const InvitationsScreen(),
-    BlocProvider(
-      create: (_) => sl<CreateAlbumCubit>(),
-      child: const CreateAlbumScreen(),
-    ),
-    const AlbumsScreen(),
-    const ProfileScreen(),
-  ];
+  late final List<Widget> tabs;
 
   @override
   void initState() {
     super.initState();
+
     currentIndex = widget.initialIndex;
+
+    tabs = [
+      MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => sl<AlbumsCubit>()..getMyAlbums()),
+          BlocProvider(
+            create: (_) => sl<InvitedAlbumsCubit>()..getInvitedAlbums(),
+          ),
+        ],
+        child: const HomeScreen(),
+      ),
+      const InvitationsScreen(),
+      BlocProvider(
+        create: (_) => sl<CreateAlbumCubit>(),
+        child: const CreateAlbumScreen(),
+      ),
+      const AlbumsScreen(),
+      const ProfileScreen(),
+    ];
   }
 
   void _handleBackPress() {
@@ -75,6 +78,22 @@ class _NavBarScreenState extends State<NavBarScreen> {
     SystemNavigator.pop();
   }
 
+  void _changeTab(int index) {
+    setState(() {
+      currentIndex = index;
+    });
+
+    if (index == 0) {
+      final home = tabs[0];
+
+      if (home is MultiBlocProvider) {
+        Future.microtask(() {
+          final homeContext = (tabs[0] as MultiBlocProvider).key;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -89,15 +108,11 @@ class _NavBarScreenState extends State<NavBarScreen> {
         body: IndexedStack(index: currentIndex, children: tabs),
 
         floatingActionButton: Transform.translate(
-          offset: const Offset(0, 22), // ينزل 20px لتحت
+          offset: const Offset(0, 22),
           child: FloatingActionButton(
             backgroundColor: AppColors.white,
             foregroundColor: AppColors.primary,
-            onPressed: () {
-              setState(() {
-                currentIndex = 2;
-              });
-            },
+            onPressed: () => _changeTab(2),
             child: const Icon(Icons.add),
           ),
         ),
@@ -115,9 +130,7 @@ class _NavBarScreenState extends State<NavBarScreen> {
               children: [
                 _buildItem(icon: Icons.home, index: 0, label: "Home"),
                 _buildItem(icon: Icons.mail, index: 1, label: "Invitations"),
-
                 const SizedBox(width: 40),
-
                 _buildItem(
                   icon: Icons.photo_library,
                   index: 3,
@@ -140,11 +153,7 @@ class _NavBarScreenState extends State<NavBarScreen> {
     final selected = currentIndex == index;
 
     return InkWell(
-      onTap: () {
-        setState(() {
-          currentIndex = index;
-        });
-      },
+      onTap: () => _changeTab(index),
       borderRadius: BorderRadius.circular(20),
       child: SizedBox(
         width: 65,

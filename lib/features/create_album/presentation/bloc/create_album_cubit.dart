@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/entities/album_invitation_entity.dart';
 import '../../domain/entities/create_album_entity.dart';
 import '../../domain/usecases/create_album_usecase.dart';
 import 'create_album_state.dart';
@@ -15,7 +16,7 @@ class CreateAlbumCubit extends Cubit<CreateAlbumState> {
     required String title,
     required String description,
     required File? coverImage,
-    required List<String> invitedEmails,
+    required List<AlbumInvitationEntity> invitations,
   }) async {
     emit(CreateAlbumLoading());
 
@@ -23,11 +24,10 @@ class CreateAlbumCubit extends Cubit<CreateAlbumState> {
       await createAlbumUseCase(
         CreateAlbumEntity(
           title: title.trim(),
-           description: description.trim(),
-            coverImage: coverImage,
-          invitedEmails: invitedEmails,
-           
-           ),
+          description: description.trim(),
+          coverImage: coverImage,
+          invitations: invitations,
+        ),
       );
 
       emit(CreateAlbumSuccess());

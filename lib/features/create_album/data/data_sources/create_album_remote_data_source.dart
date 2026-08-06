@@ -15,85 +15,68 @@ class CreateAlbumRemoteDataSourceImpl implements CreateAlbumRemoteDataSource {
 
   @override
   Future<void> createAlbum(CreateAlbumModel model) async {
-    final user = client.auth.currentUser;
-
-    if (user == null) {
-      throw Exception("User not logged in");
-    }
-
-    String? coverPhotoPath;
-
-    //---------------------------------------
-    // Upload Cover Image
-    //---------------------------------------
-
-    if (model.coverImage != null) {
-      final extension = model.coverImage!.path.split('.').last;
-
-      final fileName =
-          "covers/${DateTime.now().millisecondsSinceEpoch}.$extension";
-
-      await client.storage
-          .from("album-photos")
-          .upload(
-            fileName,
-            File(model.coverImage!.path),
-            fileOptions: const FileOptions(upsert: true),
-          );
-
-      coverPhotoPath = fileName;
-    }
-
     //---------------------------------------
     // Create Album
     //---------------------------------------
 
-    final album = await client
-        .from("albums")
-        .insert({
-          "title": model.title,
-          "description": model.description,
-          "owner_id": user.id,
-          "cover_photo_id": coverPhotoPath,
-        })
-        .select()
-        .single();
-
-    final albumId = album["id"];
+    final albumId = await client.rpc(
+      "create_album",
+      params: {"p_title": model.title, "p_description": model.description},
+    );
 
     //---------------------------------------
-    // Add Owner
+    // Upload Cover
     //---------------------------------------
 
-    await client.from("album_members").insert({
-      "album_id": albumId,
-      "user_id": user.id,
-      "role": "owner",
-    });
-
-    //---------------------------------------
-    // Invite Members
-    //---------------------------------------
-
-    if (model.invitedEmails.isNotEmpty) {
-      final profiles = await client
-          .from("profiles")
-          .select("id,email")
-          .inFilter("email", model.invitedEmails);
-
-      if (profiles.isNotEmpty) {
-        final members = (profiles as List)
-            .map(
-              (e) => {
-                "album_id": albumId,
-                "user_id": e["id"],
-                "role": "member",
-              },
-            )
-            .toList();
-
-        await client.from("album_members").insert(members);
-      }
+    if (model.coverImage != null) {
+      await _uploadCover(albumId.toString(), model.coverImage!);
     }
+
+    //---------------------------------------
+    // Send Invitations
+    //---------------------------------------
+
+    for (final invitation in model.invitations) {
+      await client.rpc(
+        "send_album_invitation",
+        params: {
+          "p_album_id": albumId,
+          "p_email": invitation.email,
+          "p_role": invitation.role.name,
+        },
+      );
+    }
+  }
+
+  Future<void> _uploadCover(String albumId, File image) async {
+    final extension = image.path.split('.').last;
+
+    final response = await client.rpc(
+      "create_photo_record",
+      params: {
+        "p_album_id": albumId,
+        "p_extension": extension,
+        "p_caption": null,
+      },
+    );
+
+    final photo = (response as List).first;
+
+    final photoId = photo["photo_id"];
+
+    final storagePath = photo["storage_path"];
+
+    await client.storage
+        .from("album-photos")
+        .upload(
+          storagePath,
+          image,
+          fileOptions: const FileOptions(upsert: true),
+        );
+
+    await client.rpc(
+      "set_album_cover",
+      params: {"p_album_id": albumId, "p_photo_id": photoId},
+    );
   }
 }

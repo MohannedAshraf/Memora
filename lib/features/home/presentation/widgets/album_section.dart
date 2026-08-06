@@ -6,16 +6,28 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:memora/core/theme/app-colors.dart';
+
 import 'package:memora/features/albums/presentation/bloc/albums_cubit.dart';
 import 'package:memora/features/albums/presentation/bloc/albums_state.dart';
 
+import 'package:memora/features/albums/presentation/bloc/invited_album_cubit.dart';
+import 'package:memora/features/albums/presentation/bloc/invited_album_state.dart';
+
 import 'album_card.dart';
 
+enum AlbumSectionType { myAlbums, invitedAlbums }
+
 class AlbumSection extends StatelessWidget {
-  const AlbumSection({super.key, required this.title, required this.onSeeAll});
+  const AlbumSection({
+    super.key,
+    required this.title,
+    required this.onSeeAll,
+    required this.type,
+  });
 
   final String title;
   final VoidCallback onSeeAll;
+  final AlbumSectionType type;
 
   @override
   Widget build(BuildContext context) {
@@ -42,71 +54,130 @@ class AlbumSection extends StatelessWidget {
 
         SizedBox(height: 16.h),
 
-        BlocBuilder<AlbumsCubit, AlbumsState>(
-          builder: (context, state) {
-            if (state is AlbumsLoading) {
-              return SizedBox(
-                height: 300.h,
-                child: const Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            if (state is AlbumsFailure) {
-              return SizedBox(
-                height: 300.h,
-                child: Center(
-                  child: Text(
-                    state.message,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                ),
-              );
-            }
-
-            if (state is AlbumsLoaded) {
-              if (state.albums.isEmpty) {
+        if (type == AlbumSectionType.myAlbums)
+          BlocBuilder<AlbumsCubit, AlbumsState>(
+            builder: (context, state) {
+              if (state is AlbumsLoading) {
                 return SizedBox(
                   height: 300.h,
-                  child: const Center(child: Text("No Albums Yet")),
+                  child: const Center(child: CircularProgressIndicator()),
                 );
               }
 
-              return CarouselSlider.builder(
-                itemCount: state.albums.length,
-                itemBuilder: (_, index, __) {
-                  final album = state.albums[index];
-
-                  return AlbumCard(
-                    title: album.title,
-                    // coverUrl: "",
-                    // photosCount: 0,
-                    // membersCount: 0,
-                    updatedAt: album.updatedAt
-                        .toLocal()
-                        .toString()
-                        .split(" ")
-                        .first,
-                    onTap: () {},
-                  );
-                },
-                options: CarouselOptions(
+              if (state is AlbumsFailure) {
+                return SizedBox(
                   height: 300.h,
-                  viewportFraction: 0.82,
-                  enlargeCenterPage: false,
-                  enlargeStrategy: CenterPageEnlargeStrategy.scale,
-                  autoPlay: true,
-                  autoPlayInterval: const Duration(seconds: 5),
-                  autoPlayAnimationDuration: const Duration(milliseconds: 800),
-                  autoPlayCurve: Curves.easeInOut,
-                  enableInfiniteScroll: true,
-                  scrollPhysics: const BouncingScrollPhysics(),
-                ),
-              );
-            }
+                  child: Center(
+                    child: Text(
+                      state.message,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+                );
+              }
 
-            return const SizedBox.shrink();
-          },
-        ),
+              if (state is AlbumsLoaded) {
+                if (state.albums.isEmpty) {
+                  return SizedBox(
+                    height: 300.h,
+                    child: const Center(child: Text("No Albums Yet")),
+                  );
+                }
+
+                return CarouselSlider.builder(
+                  itemCount: state.albums.length,
+                  itemBuilder: (_, index, __) {
+                    final album = state.albums[index];
+
+                    return AlbumCard(
+                      title: album.title,
+                      updatedAt: album.updatedAt
+                          .toLocal()
+                          .toString()
+                          .split(" ")
+                          .first,
+                      onTap: () {},
+                    );
+                  },
+                  options: CarouselOptions(
+                    height: 300.h,
+                    viewportFraction: 0.82,
+                    enlargeCenterPage: false,
+                    autoPlay: true,
+                    autoPlayInterval: const Duration(seconds: 5),
+                    autoPlayAnimationDuration: const Duration(
+                      milliseconds: 800,
+                    ),
+                    enableInfiniteScroll: true,
+                  ),
+                );
+              }
+
+              return const SizedBox.shrink();
+            },
+          )
+        else
+          BlocBuilder<InvitedAlbumsCubit, InvitedAlbumsState>(
+            builder: (context, state) {
+              if (state is InvitedAlbumsLoading) {
+                return SizedBox(
+                  height: 300.h,
+                  child: const Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              if (state is InvitedAlbumsFailure) {
+                return SizedBox(
+                  height: 300.h,
+                  child: Center(
+                    child: Text(
+                      state.message,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+                );
+              }
+
+              if (state is InvitedAlbumsLoaded) {
+                if (state.albums.isEmpty) {
+                  return SizedBox(
+                    height: 300.h,
+                    child: const Center(child: Text("No Invited Albums")),
+                  );
+                }
+
+                return CarouselSlider.builder(
+                  itemCount: state.albums.length,
+                  itemBuilder: (_, index, __) {
+                    final album = state.albums[index];
+
+                    return AlbumCard(
+                      title: album.title,
+                      updatedAt: album.updatedAt
+                          .toLocal()
+                          .toString()
+                          .split(" ")
+                          .first,
+                      onTap: () {},
+                    );
+                  },
+                  options: CarouselOptions(
+                    height: 300.h,
+                    viewportFraction: 0.82,
+                    enlargeCenterPage: false,
+                    autoPlay: true,
+                    autoPlayInterval: const Duration(seconds: 5),
+                    autoPlayAnimationDuration: const Duration(
+                      milliseconds: 800,
+                    ),
+                    enableInfiniteScroll: true,
+                  ),
+                );
+              }
+
+              return const SizedBox.shrink();
+            },
+          ),
       ],
     );
   }
