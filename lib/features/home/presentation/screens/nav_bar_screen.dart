@@ -19,7 +19,8 @@ import '../../../profile/presentation/screens/profile_screen.dart';
 class NavBarScreen extends StatefulWidget {
   final int initialIndex;
 
-  const NavBarScreen({super.key, this.initialIndex = 0});
+  const NavBarScreen({super.key, this.initialIndex = 0,
+  });
 
   @override
   State<NavBarScreen> createState() => _NavBarScreenState();
@@ -53,7 +54,8 @@ class _NavBarScreenState extends State<NavBarScreen> {
         create: (_) => sl<CreateAlbumCubit>(),
         child: const CreateAlbumScreen(),
       ),
-      const AlbumsScreen(),
+    const AlbumsScreen(),
+
       const ProfileScreen(),
     ];
   }

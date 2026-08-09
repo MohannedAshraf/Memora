@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:memora/core/di/injection.dart';
+import 'package:memora/features/albums/presentation/screens/invited_album_screen.dart';
+import 'package:memora/features/albums/presentation/screens/my_albums_screen.dart';
 import 'package:memora/features/search/presentation/screens/search_screen.dart';
 
 import '../../features/auth/presentation/bloc/login_cubit.dart';
@@ -38,7 +40,7 @@ class AppRouter {
         ),
       ),
 
-      GoRoute(
+     GoRoute(
         path: '/home',
         builder: (_, state) {
           final index =
@@ -47,14 +49,22 @@ class AppRouter {
           return NavBarScreen(initialIndex: index);
         },
       ),
-
-GoRoute(
-        path: "/search",
-        builder: (_, state) {
-          final query = state.uri.queryParameters["query"] ?? "";
+      GoRoute(
+        path: '/search',
+        builder: (context, state) {
+          final query = state.uri.queryParameters['query'] ?? '';
 
           return SearchScreen(initialQuery: query);
         },
-      ),    ],
+      ),
+
+GoRoute(path: '/my-albums', builder: (_, __) => const MyAlbumsScreen()),
+
+      GoRoute(
+        path: '/invited-albums',
+        builder: (_, __) => const InvitedAlbumsScreen(),
+      ),
+
+    ],
   );
 }

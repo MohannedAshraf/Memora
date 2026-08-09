@@ -13,6 +13,7 @@ class HomeSearchBar extends StatefulWidget {
   });
 
   final ValueChanged<String>? onChanged;
+
   final VoidCallback? onSearchPressed;
 
   final TextEditingController? controller;
@@ -28,10 +29,13 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
   @override
   void initState() {
     super.initState();
+
     widget.controller?.addListener(_refresh);
   }
 
   void _refresh() {
+    if (!mounted) return;
+
     setState(() {});
   }
 
@@ -43,6 +47,9 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final hasText =
+        widget.controller != null && widget.controller!.text.trim().isNotEmpty;
+
     return TextField(
       controller: widget.controller,
       autofocus: widget.autofocus,
@@ -60,16 +67,15 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
         hintText: "Search albums...",
 
         prefixIcon: IconButton(
-          icon: const Icon(Icons.search),
+          icon: const Icon(Icons.search_rounded),
           onPressed: widget.onSearchPressed,
         ),
 
-        suffixIcon:
-            widget.controller != null && widget.controller!.text.isNotEmpty
+        suffixIcon: hasText
             ? IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () {
-                  widget.controller!.clear();
+                  widget.controller?.clear();
                   widget.onChanged?.call("");
                 },
               )
