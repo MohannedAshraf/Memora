@@ -8,6 +8,8 @@ import 'package:memora/features/albums/presentation/screens/album_details_screen
 import 'package:memora/features/albums/presentation/screens/album_members_screen.dart';
 import 'package:memora/features/albums/presentation/screens/invited_album_screen.dart';
 import 'package:memora/features/albums/presentation/screens/my_albums_screen.dart';
+import 'package:memora/features/profile/presentation/bloc/profile_cubit.dart';
+import 'package:memora/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:memora/features/search/presentation/screens/search_screen.dart';
 
 import '../../features/auth/presentation/bloc/login_cubit.dart';
@@ -84,6 +86,17 @@ GoRoute(path: '/my-albums', builder: (_, __) => const MyAlbumsScreen()),
           final albumTitle = state.uri.queryParameters['title'] ?? 'Members';
 
           return AlbumMembersScreen(albumId: albumId, albumTitle: albumTitle);
+        },
+      ),
+     GoRoute(
+        path: '/edit-profile',
+        builder: (context, state) {
+          final profile = state.extra;
+
+          return BlocProvider(
+            create: (_) => sl<ProfileCubit>(),
+            child: EditProfileScreen(profile: profile),
+          );
         },
       ),
 

@@ -39,6 +39,13 @@ import 'package:memora/features/invitations/domain/usecases/accept_invitation_us
 import 'package:memora/features/invitations/domain/usecases/decline_invitation_usecase.dart';
 import 'package:memora/features/invitations/domain/usecases/get_pending_invitations_usecase.dart';
 import 'package:memora/features/invitations/presentation/bloc/invitations_cubit.dart';
+import 'package:memora/features/profile/data/data_sources/profile_remote_data_source.dart';
+import 'package:memora/features/profile/domain/repo/profile_repository.dart';
+import 'package:memora/features/profile/domain/repo/profile_repository_impl.dart';
+import 'package:memora/features/profile/domain/usecases/get_profile_use_case.dart';
+import 'package:memora/features/profile/domain/usecases/update_profile_use_case.dart';
+import 'package:memora/features/profile/domain/usecases/upload_avatar_use_case.dart';
+import 'package:memora/features/profile/presentation/bloc/profile_cubit.dart';
 import 'package:memora/features/search/data/data_sources/search_remote_data_source.dart';
 import 'package:memora/features/search/domain/repo/search_repo.dart';
 import 'package:memora/features/search/domain/repo/search_repo_impl.dart';
@@ -222,4 +229,31 @@ sl.registerLazySingleton<InvitedAlbumsRemoteDataSource>(
 //sl.registerLazySingleton(() => GetAlbumUserRoleUseCase(sl()));
 sl.registerFactory(() => AlbumUserRoleCubit(sl()));
 
+
+
+
+sl.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(sl()),
+  );
+sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(sl()),
+  );
+
+  sl.registerLazySingleton<GetProfileUseCase>(() => GetProfileUseCase(sl()));
+
+  sl.registerLazySingleton<UpdateProfileUseCase>(
+    () => UpdateProfileUseCase(sl()),
+  );
+
+  sl.registerLazySingleton<UploadAvatarUseCase>(
+    () => UploadAvatarUseCase(sl()),
+  );
+
+  sl.registerFactory<ProfileCubit>(
+    () => ProfileCubit(
+      getProfileUseCase: sl(),
+      updateProfileUseCase: sl(),
+      uploadAvatarUseCase: sl(),
+    ),
+  );
 }
