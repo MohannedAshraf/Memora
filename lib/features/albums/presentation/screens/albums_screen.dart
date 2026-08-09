@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:memora/core/widgets/special_album_card.dart';
 
 import '../../../../core/di/injection.dart';
@@ -72,7 +73,9 @@ class _AlbumsBody extends StatelessWidget {
                             .toString()
                             .split(" ")
                             .first,
-                        onTap: () {},
+                        onTap: () {
+                           context.push('/album-details/${album.id}');
+                        },
                       ),
                     );
                   }).toList(),
@@ -114,7 +117,9 @@ class _AlbumsBody extends StatelessWidget {
                             .toString()
                             .split(" ")
                             .first,
-                        onTap: () {},
+                        onTap: () {
+                          context.push('/album-details/${album.id}');
+                        },
                       ),
                     );
                   }).toList(),

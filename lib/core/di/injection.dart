@@ -1,12 +1,30 @@
 import 'package:get_it/get_it.dart';
+import 'package:memora/core/services/media_picker_service.dart';
+import 'package:memora/features/albums/data/data_sources/album_details_remote_data_source.dart';
+import 'package:memora/features/albums/data/data_sources/album_media_remote_data_source.dart';
+import 'package:memora/features/albums/data/data_sources/album_members_remote_data_source.dart';
 import 'package:memora/features/albums/data/data_sources/albums_remote_data_source.dart';
 import 'package:memora/features/albums/data/data_sources/invited_album_remote_data_source.dart';
+import 'package:memora/features/albums/domain/repo/album_details_repository.dart';
+import 'package:memora/features/albums/domain/repo/album_details_repository_impl.dart';
+import 'package:memora/features/albums/domain/repo/album_media_repository.dart';
+import 'package:memora/features/albums/domain/repo/album_media_repository_impl.dart';
+import 'package:memora/features/albums/domain/repo/album_members_repository.dart';
+import 'package:memora/features/albums/domain/repo/album_members_repository_impl.dart';
 import 'package:memora/features/albums/domain/repo/albums_repository.dart';
 import 'package:memora/features/albums/domain/repo/albums_repository_impl.dart';
 import 'package:memora/features/albums/domain/repo/invited_album_repo.dart';
 import 'package:memora/features/albums/domain/repo/invited_album_repo_impl.dart';
+import 'package:memora/features/albums/domain/usecase/get_album_details_usecase.dart';
+import 'package:memora/features/albums/domain/usecase/get_album_media_usecase.dart';
+import 'package:memora/features/albums/domain/usecase/get_album_members_usecase.dart';
+import 'package:memora/features/albums/domain/usecase/get_album_user_role_usecase.dart';
 import 'package:memora/features/albums/domain/usecase/get_invited_album_usecase.dart';
 import 'package:memora/features/albums/domain/usecase/get_my_albums_usecase.dart';
+import 'package:memora/features/albums/presentation/bloc/album_details_cubit.dart';
+import 'package:memora/features/albums/presentation/bloc/album_media_cubit.dart';
+import 'package:memora/features/albums/presentation/bloc/album_members_cubit.dart';
+import 'package:memora/features/albums/presentation/bloc/album_user_role_cubit.dart';
 import 'package:memora/features/albums/presentation/bloc/albums_cubit.dart';
 import 'package:memora/features/albums/presentation/bloc/invited_album_cubit.dart';
 import 'package:memora/features/create_album/data/data_sources/create_album_remote_data_source.dart';
@@ -136,5 +154,72 @@ sl.registerLazySingleton<InvitedAlbumsRemoteDataSource>(
 
 
   sl.registerFactory(() => SearchCubit(sl()));
+
+
+
+  // ==============================
+  // Album Details
+  // ==============================
+
+  sl.registerLazySingleton<AlbumDetailsRemoteDataSource>(
+    () => AlbumDetailsRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<AlbumDetailsRepository>(
+    () => AlbumDetailsRepositoryImpl(sl()),
+  );
+
+  sl.registerLazySingleton(() => GetAlbumDetailsUseCase(sl()));
+
+  // ==============================
+  // Album Members
+  // ==============================
+
+  sl.registerLazySingleton<AlbumMembersRemoteDataSource>(
+    () => AlbumMembersRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<AlbumMembersRepository>(
+    () => AlbumMembersRepositoryImpl(sl()),
+  );
+
+  sl.registerLazySingleton(() => GetAlbumMembersUseCase(sl()));
+
+  sl.registerLazySingleton(() => GetAlbumUserRoleUseCase(sl()));
+
+  // ==============================
+  // Album Media
+  // ==============================
+
+  sl.registerLazySingleton<AlbumMediaRemoteDataSource>(
+    () => AlbumMediaRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<AlbumMediaRepository>(
+    () => AlbumMediaRepositoryImpl(sl()),
+  );
+
+  // ==============================
+  // Album Details Cubit
+  // ==============================
+
+  sl.registerFactory(() => AlbumDetailsCubit(sl()));
+
+  // ==============================
+  // Album Members Cubit
+  // ==============================
+
+  sl.registerFactory(() => AlbumMembersCubit(sl()));
+
+  // ==============================
+  // Album Media Cubit
+  // ==============================
+
+  sl.registerFactory(() => AlbumMediaCubit(sl())); 
+  sl.registerLazySingleton<MediaPickerService>(() => MediaPickerService());
+  sl.registerLazySingleton(() => GetAlbumMediaUseCase(sl()));
+
+//sl.registerLazySingleton(() => GetAlbumUserRoleUseCase(sl()));
+sl.registerFactory(() => AlbumUserRoleCubit(sl()));
 
 }

@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:memora/core/di/injection.dart';
+import 'package:memora/features/albums/presentation/screens/album_details_screen.dart';
+import 'package:memora/features/albums/presentation/screens/album_members_screen.dart';
 import 'package:memora/features/albums/presentation/screens/invited_album_screen.dart';
 import 'package:memora/features/albums/presentation/screens/my_albums_screen.dart';
 import 'package:memora/features/search/presentation/screens/search_screen.dart';
@@ -63,6 +65,26 @@ GoRoute(path: '/my-albums', builder: (_, __) => const MyAlbumsScreen()),
       GoRoute(
         path: '/invited-albums',
         builder: (_, __) => const InvitedAlbumsScreen(),
+      ),
+
+      GoRoute(
+        path: '/album-details/:albumId',
+        builder: (context, state) {
+          final albumId = state.pathParameters['albumId']!;
+
+          return AlbumDetailsScreen(albumId: albumId);
+        },
+      ),
+     
+      GoRoute(
+        path: '/album-details/:albumId/members',
+        builder: (context, state) {
+          final albumId = state.pathParameters['albumId']!;
+
+          final albumTitle = state.uri.queryParameters['title'] ?? 'Members';
+
+          return AlbumMembersScreen(albumId: albumId, albumTitle: albumTitle);
+        },
       ),
 
     ],
