@@ -19,8 +19,7 @@ import '../../../profile/presentation/screens/profile_screen.dart';
 class NavBarScreen extends StatefulWidget {
   final int initialIndex;
 
-  const NavBarScreen({super.key, this.initialIndex = 0,
-  });
+  const NavBarScreen({super.key, this.initialIndex = 0});
 
   @override
   State<NavBarScreen> createState() => _NavBarScreenState();
@@ -31,34 +30,64 @@ class _NavBarScreenState extends State<NavBarScreen> {
 
   DateTime? lastBackPressed;
 
-  late final List<Widget> tabs;
-
   @override
   void initState() {
     super.initState();
 
     currentIndex = widget.initialIndex;
-
-    tabs = [
-      MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (_) => sl<AlbumsCubit>()..getMyAlbums()),
-          BlocProvider(
-            create: (_) => sl<InvitedAlbumsCubit>()..getInvitedAlbums(),
-          ),
-        ],
-        child: const HomeScreen(),
-      ),
-      const InvitationsScreen(),
-      BlocProvider(
-        create: (_) => sl<CreateAlbumCubit>(),
-        child: const CreateAlbumScreen(),
-      ),
-    const AlbumsScreen(),
-
-      const ProfileScreen(),
-    ];
   }
+
+  // ============================================================
+  // BUILD CURRENT TAB
+  // ============================================================
+
+  Widget _buildCurrentTab() {
+    Widget child;
+
+    switch (currentIndex) {
+      case 0:
+        child = MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => sl<AlbumsCubit>()..getMyAlbums()),
+            BlocProvider(
+              create: (_) => sl<InvitedAlbumsCubit>()..getInvitedAlbums(),
+            ),
+          ],
+          child: const HomeScreen(),
+        );
+        break;
+
+      case 1:
+        child = const InvitationsScreen();
+        break;
+
+      case 2:
+        child = BlocProvider(
+          create: (_) => sl<CreateAlbumCubit>(),
+          child: const CreateAlbumScreen(),
+        );
+        break;
+
+      case 3:
+        child = const AlbumsScreen();
+        break;
+
+      case 4:
+        child = const ProfileScreen();
+        break;
+
+      default:
+        child = const HomeScreen();
+    }
+
+    // مهم جداً:
+    // كل مرة نغير Tab الصفحة تتعمل من جديد
+    return KeyedSubtree(key: UniqueKey(), child: child);
+  }
+
+  // ============================================================
+  // BACK
+  // ============================================================
 
   void _handleBackPress() {
     final now = DateTime.now();
@@ -80,21 +109,26 @@ class _NavBarScreenState extends State<NavBarScreen> {
     SystemNavigator.pop();
   }
 
+  // ============================================================
+  // CHANGE TAB
+  // ============================================================
+
   void _changeTab(int index) {
+    if (currentIndex == index) {
+      // حتى لو ضغط على نفس الصفحة
+      // نعيد بناءها من الصفر
+      setState(() {});
+      return;
+    }
+
     setState(() {
       currentIndex = index;
     });
-
-    if (index == 0) {
-      final home = tabs[0];
-
-      if (home is MultiBlocProvider) {
-        Future.microtask(() {
-          final homeContext = (tabs[0] as MultiBlocProvider).key;
-        });
-      }
-    }
   }
+
+  // ============================================================
+  // BUILD
+  // ============================================================
 
   @override
   Widget build(BuildContext context) {
@@ -102,42 +136,65 @@ class _NavBarScreenState extends State<NavBarScreen> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
+
         _handleBackPress();
       },
+
       child: Scaffold(
         drawer: const AppDrawer(),
 
-        body: IndexedStack(index: currentIndex, children: tabs),
+        // ======================================================
+        // CURRENT PAGE ONLY
+        // ======================================================
+        body: _buildCurrentTab(),
 
+        // ======================================================
+        // FLOATING ACTION BUTTON
+        // ======================================================
         floatingActionButton: Transform.translate(
           offset: const Offset(0, 22),
+
           child: FloatingActionButton(
             backgroundColor: AppColors.white,
             foregroundColor: AppColors.primary,
-            onPressed: () => _changeTab(2),
+
+            onPressed: () {
+              _changeTab(2);
+            },
+
             child: const Icon(Icons.add),
           ),
         ),
 
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
+        // ======================================================
+        // BOTTOM NAVIGATION
+        // ======================================================
         bottomNavigationBar: BottomAppBar(
           color: AppColors.primary,
           shape: const CircularNotchedRectangle(),
           notchMargin: 8,
+
           child: SizedBox(
             height: 65,
+
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
+
               children: [
                 _buildItem(icon: Icons.home, index: 0, label: "Home"),
+
                 _buildItem(icon: Icons.mail, index: 1, label: "Invitations"),
+
                 const SizedBox(width: 40),
+
                 _buildItem(
                   icon: Icons.photo_library,
                   index: 3,
                   label: "Albums",
                 ),
+
                 _buildItem(icon: Icons.person, index: 4, label: "Profile"),
               ],
             ),
@@ -146,6 +203,10 @@ class _NavBarScreenState extends State<NavBarScreen> {
       ),
     );
   }
+
+  // ============================================================
+  // NAV ITEM
+  // ============================================================
 
   Widget _buildItem({
     required IconData icon,
@@ -156,16 +217,23 @@ class _NavBarScreenState extends State<NavBarScreen> {
 
     return InkWell(
       onTap: () => _changeTab(index),
+
       borderRadius: BorderRadius.circular(20),
+
       child: SizedBox(
         width: 65,
+
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+
           children: [
             Icon(icon, color: selected ? Colors.white : Colors.white70),
+
             const SizedBox(height: 4),
+
             Text(
               label,
+
               style: TextStyle(
                 fontSize: 11,
                 color: selected ? Colors.white : Colors.white70,

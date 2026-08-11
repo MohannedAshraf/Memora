@@ -9,4 +9,8 @@ class GetAlbumMembersUseCase {
   Future<List<AlbumMemberEntity>> call(String albumId) {
     return repository.getAlbumMembers(albumId);
   }
+
+  Future<String?> getCurrentUserRole(String albumId) {
+    return repository.getCurrentUserRole(albumId);
+  }
 }

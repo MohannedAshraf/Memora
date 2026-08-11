@@ -14,7 +14,13 @@ class AlbumMembersCubit extends Cubit<AlbumMembersState> {
     try {
       final members = await getAlbumMembersUseCase(albumId);
 
-      emit(AlbumMembersLoaded(members));
+      final currentUserRole = await getAlbumMembersUseCase.getCurrentUserRole(
+        albumId,
+      );
+
+      emit(
+        AlbumMembersLoaded(members: members, currentUserRole: currentUserRole),
+      );
     } catch (e) {
       emit(AlbumMembersFailure(e.toString()));
     }

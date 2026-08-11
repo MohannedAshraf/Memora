@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app-colors.dart';
@@ -22,14 +23,15 @@ class AlbumMembersScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<AlbumMembersCubit>()..getAlbumMembers(albumId),
-      child: _AlbumMembersBody(albumTitle: albumTitle),
+      child: _AlbumMembersBody(albumId: albumId, albumTitle: albumTitle),
     );
   }
 }
 
 class _AlbumMembersBody extends StatelessWidget {
-  const _AlbumMembersBody({required this.albumTitle});
+  const _AlbumMembersBody({required this.albumId, required this.albumTitle});
 
+  final String albumId;
   final String albumTitle;
 
   @override
@@ -37,11 +39,14 @@ class _AlbumMembersBody extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
 
+      // ============================================================
+      // APP BAR
+      // ============================================================
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
 
-        leading: BackButton(),
+        leading: const BackButton(),
 
         centerTitle: true,
 
@@ -55,11 +60,22 @@ class _AlbumMembersBody extends StatelessWidget {
         ),
       ),
 
+      // ============================================================
+      // MEMBERS
+      // ============================================================
       body: BlocBuilder<AlbumMembersCubit, AlbumMembersState>(
         builder: (context, state) {
+          // ----------------------------------------------------------
+          // Loading
+          // ----------------------------------------------------------
+
           if (state is AlbumMembersLoading) {
             return const Center(child: CircularProgressIndicator());
           }
+
+          // ----------------------------------------------------------
+          // Failure
+          // ----------------------------------------------------------
 
           if (state is AlbumMembersFailure) {
             return Center(
@@ -77,6 +93,10 @@ class _AlbumMembersBody extends StatelessWidget {
             );
           }
 
+          // ----------------------------------------------------------
+          // Loaded
+          // ----------------------------------------------------------
+
           if (state is AlbumMembersLoaded) {
             if (state.members.isEmpty) {
               return Center(
@@ -92,9 +112,13 @@ class _AlbumMembersBody extends StatelessWidget {
 
             return ListView.separated(
               physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 30.h),
+
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 100.h),
+
               itemCount: state.members.length,
-              separatorBuilder: (_, _) => SizedBox(height: 10.h),
+
+              separatorBuilder: (_, __) => SizedBox(height: 10.h),
+
               itemBuilder: (context, index) {
                 final member = state.members[index];
 
@@ -111,9 +135,44 @@ class _AlbumMembersBody extends StatelessWidget {
           return const SizedBox.shrink();
         },
       ),
+
+      // ============================================================
+      // ADD MEMBER FAB
+      // يظهر للـ OWNER فقط
+      // ============================================================
+      floatingActionButton: BlocBuilder<AlbumMembersCubit, AlbumMembersState>(
+        builder: (context, state) {
+          if (state is! AlbumMembersLoaded) {
+            return const SizedBox.shrink();
+          }
+
+          if (!state.isOwner) {
+            return const SizedBox.shrink();
+          }
+
+          return FloatingActionButton(
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.white,
+
+          onPressed: () {
+              context.push(
+                '/add-album-members'
+                '?albumId=${Uri.encodeComponent(albumId)}'
+                '&albumTitle=${Uri.encodeComponent(albumTitle)}',
+              );
+            },
+
+            child: const Icon(Icons.person_add_alt_1_rounded),
+          );
+        },
+      ),
     );
   }
 }
+
+// ================================================================
+// MEMBER CARD
+// ================================================================
 
 class _MemberCard extends StatelessWidget {
   const _MemberCard({
@@ -132,20 +191,27 @@ class _MemberCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
+
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: AppColors.border),
       ),
+
       child: Row(
         children: [
-          /// Avatar
+          // --------------------------------------------------------
+          // Avatar
+          // --------------------------------------------------------
           _buildAvatar(),
 
           SizedBox(width: 12.w),
 
-          /// Name + Email
+          // --------------------------------------------------------
+          // Name + Email
+          // --------------------------------------------------------
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,6 +220,7 @@ class _MemberCard extends StatelessWidget {
                   name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+
                   style: TextStyle(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
@@ -163,10 +230,12 @@ class _MemberCard extends StatelessWidget {
 
                 if (email != null && email!.trim().isNotEmpty) ...[
                   SizedBox(height: 4.h),
+
                   Text(
                     email!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+
                     style: TextStyle(
                       fontSize: 11.sp,
                       color: AppColors.textSecondary,
@@ -179,7 +248,9 @@ class _MemberCard extends StatelessWidget {
 
           SizedBox(width: 10.w),
 
-          /// Role
+          // --------------------------------------------------------
+          // Role
+          // --------------------------------------------------------
           _RoleBadge(role: role),
         ],
       ),
@@ -190,7 +261,9 @@ class _MemberCard extends StatelessWidget {
     if (avatarPath == null || avatarPath!.trim().isEmpty) {
       return CircleAvatar(
         radius: 24.r,
+
         backgroundColor: AppColors.surface,
+
         child: Icon(
           Icons.person_outline_rounded,
           color: AppColors.textSecondary,
@@ -201,11 +274,17 @@ class _MemberCard extends StatelessWidget {
 
     return CircleAvatar(
       radius: 24.r,
+
       backgroundColor: AppColors.surface,
+
       backgroundImage: NetworkImage(avatarPath!),
     );
   }
 }
+
+// ================================================================
+// ROLE BADGE
+// ================================================================
 
 class _RoleBadge extends StatelessWidget {
   const _RoleBadge({required this.role});
@@ -217,13 +296,12 @@ class _RoleBadge extends StatelessWidget {
     final normalizedRole = role.toLowerCase();
 
     String label;
-
     IconData icon;
 
     if (normalizedRole == 'owner') {
       label = 'Owner';
       icon = Icons.workspace_premium_outlined;
-    } else if (normalizedRole == 'edit') {
+    } else if (normalizedRole == 'edit' || normalizedRole == 'editor') {
       label = 'Edit';
       icon = Icons.edit_outlined;
     } else {
@@ -233,15 +311,19 @@ class _RoleBadge extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 7.h),
+
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
       ),
+
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14.sp, color: AppColors.textSecondary),
+
           SizedBox(width: 4.w),
+
           Text(
             label,
             style: TextStyle(

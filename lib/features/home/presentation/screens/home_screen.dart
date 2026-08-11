@@ -6,6 +6,7 @@ import 'package:memora/features/search/presentation/widgets/search_suggestions.d
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../notification/presentation/bloc/notification_cubit.dart';
 import '../../../search/presentation/bloc/search_cubit.dart';
 import '../widgets/album_section.dart';
 import '../widgets/home_header.dart';
@@ -51,8 +52,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final userName = user?.userMetadata?['full_name'] ?? "User";
 
-    return BlocProvider(
-      create: (_) => sl<SearchCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        // Search Cubit
+        BlocProvider<SearchCubit>(create: (_) => sl<SearchCubit>()),
+
+        // Notification Cubit
+        BlocProvider<NotificationCubit>(
+          create: (_) => sl<NotificationCubit>()..getNotifications(),
+        ),
+      ],
 
       child: SafeArea(
         child: SingleChildScrollView(
@@ -60,12 +69,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+
             children: [
-              /// Header
+              // ==================================================
+              // HEADER
+              // ==================================================
               Padding(
                 padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 0),
+
                 child: HomeHeader(
                   userName: userName,
+
                   onMenuTap: () {
                     Scaffold.of(context).openDrawer();
                   },
@@ -74,51 +88,60 @@ class _HomeScreenState extends State<HomeScreen> {
 
               SizedBox(height: 28.h),
 
-              /// Search
+              // ==================================================
+              // SEARCH
+              // ==================================================
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
+
                 child: HomeSearchBar(
                   controller: _searchController,
 
-                  /// Search automatically while typing.
                   onChanged: (value) {
                     context.read<SearchCubit>().search(value);
                   },
 
-                  /// Go to full search screen.
                   onSearchPressed: _openSearchScreen,
                 ),
               ),
 
-              /// First 5 search suggestions only.
+              // ==================================================
+              // SEARCH SUGGESTIONS
+              // ==================================================
               const SearchSuggestions(maxResults: 5),
 
               SizedBox(height: 30.h),
 
-              /// My Albums
+              // ==================================================
+              // MY ALBUMS
+              // ==================================================
               Padding(
                 padding: EdgeInsets.only(left: 20.w),
+
                 child: AlbumSection(
                   title: "My Albums",
                   type: AlbumSectionType.myAlbums,
-                  onSeeAll: () {
-                       context.push('/my-albums');
 
+                  onSeeAll: () {
+                    context.push('/my-albums');
                   },
                 ),
               ),
 
               SizedBox(height: 34.h),
 
-              /// Invited Albums
+              // ==================================================
+              // INVITED ALBUMS
+              // ==================================================
               Padding(
                 padding: EdgeInsets.only(left: 20.w),
+
                 child: AlbumSection(
                   title: "Invited Albums",
                   type: AlbumSectionType.invitedAlbums,
-                  onSeeAll: () {
-                        context.push('/invited-albums');
 
+                  onSeeAll: () {
+                    context.push('/invited-albums');
                   },
                 ),
               ),

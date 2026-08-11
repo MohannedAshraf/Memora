@@ -4,10 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:memora/core/di/injection.dart';
+import 'package:memora/features/albums/presentation/screens/add_album_members_screen.dart';
 import 'package:memora/features/albums/presentation/screens/album_details_screen.dart';
 import 'package:memora/features/albums/presentation/screens/album_members_screen.dart';
 import 'package:memora/features/albums/presentation/screens/invited_album_screen.dart';
 import 'package:memora/features/albums/presentation/screens/my_albums_screen.dart';
+import 'package:memora/features/notification/presentation/bloc/notification_cubit.dart';
+import 'package:memora/features/notification/presentation/screens/notifications_screen.dart';
 import 'package:memora/features/profile/presentation/bloc/profile_cubit.dart';
 import 'package:memora/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:memora/features/search/presentation/screens/search_screen.dart';
@@ -106,7 +109,31 @@ GoRoute(path: '/my-albums', builder: (_, __) => const MyAlbumsScreen()),
           return const SettingsScreen();
         },
       ),
+      GoRoute(
+        path: '/notifications',
+        builder: (_, __) => BlocProvider(
+          create: (_) => sl<NotificationCubit>()..getNotifications(),
+          child: const NotificationsScreen(),
+        ),
+      ),
+
+      GoRoute(
+        path: '/add-album-members',
+        builder: (context, state) {
+          final albumId = state.uri.queryParameters['albumId'] ?? '';
+
+          final albumTitle = state.uri.queryParameters['albumTitle'] ?? '';
+
+          return AddAlbumMembersScreen(
+            albumId: albumId,
+            albumTitle: albumTitle,
+          );
+        },
+      ),
 
     ],
   );
+
+
+  
 }

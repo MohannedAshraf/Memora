@@ -1,10 +1,13 @@
 import 'package:get_it/get_it.dart';
 import 'package:memora/core/services/media_picker_service.dart';
+import 'package:memora/features/albums/data/data_sources/add_album_members_remote_data_source.dart';
 import 'package:memora/features/albums/data/data_sources/album_details_remote_data_source.dart';
 import 'package:memora/features/albums/data/data_sources/album_media_remote_data_source.dart';
 import 'package:memora/features/albums/data/data_sources/album_members_remote_data_source.dart';
 import 'package:memora/features/albums/data/data_sources/albums_remote_data_source.dart';
 import 'package:memora/features/albums/data/data_sources/invited_album_remote_data_source.dart';
+import 'package:memora/features/albums/domain/repo/add_album_members_repository.dart';
+import 'package:memora/features/albums/domain/repo/add_album_members_repository_impl.dart';
 import 'package:memora/features/albums/domain/repo/album_details_repository.dart';
 import 'package:memora/features/albums/domain/repo/album_details_repository_impl.dart';
 import 'package:memora/features/albums/domain/repo/album_media_repository.dart';
@@ -15,12 +18,14 @@ import 'package:memora/features/albums/domain/repo/albums_repository.dart';
 import 'package:memora/features/albums/domain/repo/albums_repository_impl.dart';
 import 'package:memora/features/albums/domain/repo/invited_album_repo.dart';
 import 'package:memora/features/albums/domain/repo/invited_album_repo_impl.dart';
+import 'package:memora/features/albums/domain/usecase/add_album_members_usecase.dart';
 import 'package:memora/features/albums/domain/usecase/get_album_details_usecase.dart';
 import 'package:memora/features/albums/domain/usecase/get_album_media_usecase.dart';
 import 'package:memora/features/albums/domain/usecase/get_album_members_usecase.dart';
 import 'package:memora/features/albums/domain/usecase/get_album_user_role_usecase.dart';
 import 'package:memora/features/albums/domain/usecase/get_invited_album_usecase.dart';
 import 'package:memora/features/albums/domain/usecase/get_my_albums_usecase.dart';
+import 'package:memora/features/albums/presentation/bloc/add_album_members_cubit.dart';
 import 'package:memora/features/albums/presentation/bloc/album_details_cubit.dart';
 import 'package:memora/features/albums/presentation/bloc/album_media_cubit.dart';
 import 'package:memora/features/albums/presentation/bloc/album_members_cubit.dart';
@@ -39,6 +44,14 @@ import 'package:memora/features/invitations/domain/usecases/accept_invitation_us
 import 'package:memora/features/invitations/domain/usecases/decline_invitation_usecase.dart';
 import 'package:memora/features/invitations/domain/usecases/get_pending_invitations_usecase.dart';
 import 'package:memora/features/invitations/presentation/bloc/invitations_cubit.dart';
+import 'package:memora/features/notification/data/data_sources/notifications_remote_data_source.dart';
+import 'package:memora/features/notification/domain/repo/notification_repository.dart';
+import 'package:memora/features/notification/domain/repo/notification_repository_impl.dart';
+import 'package:memora/features/notification/domain/usecases/delete_notification_use_case.dart';
+import 'package:memora/features/notification/domain/usecases/get_notifications_use_case.dart';
+import 'package:memora/features/notification/domain/usecases/mark_all_notifications_as_read_use_case.dart';
+import 'package:memora/features/notification/domain/usecases/mark_notification_as_read_use_case.dart';
+import 'package:memora/features/notification/presentation/bloc/notification_cubit.dart';
 import 'package:memora/features/profile/data/data_sources/profile_remote_data_source.dart';
 import 'package:memora/features/profile/domain/repo/profile_repository.dart';
 import 'package:memora/features/profile/domain/repo/profile_repository_impl.dart';
@@ -256,4 +269,52 @@ sl.registerLazySingleton<ProfileRepository>(
       uploadAvatarUseCase: sl(),
     ),
   );
+
+
+  sl.registerLazySingleton<NotificationsRemoteDataSource>(
+    () => NotificationsRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(sl()),
+  );
+
+  sl.registerLazySingleton<GetNotificationsUseCase>(
+    () => GetNotificationsUseCase(sl()),
+  );
+
+  sl.registerLazySingleton<MarkNotificationAsReadUseCase>(
+    () => MarkNotificationAsReadUseCase(sl()),
+  );
+
+  sl.registerLazySingleton<MarkAllNotificationsAsReadUseCase>(
+    () => MarkAllNotificationsAsReadUseCase(sl()),
+  );
+
+  sl.registerLazySingleton<DeleteNotificationUseCase>(
+    () => DeleteNotificationUseCase(sl()),
+  );
+
+  sl.registerFactory<NotificationCubit>(
+    () => NotificationCubit(
+      getNotificationsUseCase: sl(),
+      markNotificationAsReadUseCase: sl(),
+      markAllNotificationsAsReadUseCase: sl(),
+      deleteNotificationUseCase: sl(),
+    ),
+  );
+
+  sl.registerLazySingleton<AddAlbumMembersRemoteDataSource>(
+    () => AddAlbumMembersRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<AddAlbumMembersRepository>(
+    () => AddAlbumMembersRepositoryImpl(sl()),
+  );
+
+  sl.registerLazySingleton<AddAlbumMembersUseCase>(
+    () => AddAlbumMembersUseCase(sl()),
+  );
+
+  sl.registerFactory<AddAlbumMembersCubit>(() => AddAlbumMembersCubit(sl()));
 }

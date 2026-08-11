@@ -15,11 +15,17 @@ class AlbumMembersLoading extends AlbumMembersState {}
 
 class AlbumMembersLoaded extends AlbumMembersState {
   final List<AlbumMemberEntity> members;
+  final String? currentUserRole;
 
-  const AlbumMembersLoaded(this.members);
+  const AlbumMembersLoaded({
+    required this.members,
+    required this.currentUserRole,
+  });
+
+  bool get isOwner => currentUserRole?.toLowerCase() == 'owner';
 
   @override
-  List<Object?> get props => [members];
+  List<Object?> get props => [members, currentUserRole];
 }
 
 class AlbumMembersFailure extends AlbumMembersState {
