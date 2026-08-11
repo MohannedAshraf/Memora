@@ -190,7 +190,7 @@ class _ProfileContent extends StatelessWidget {
                 title: 'Settings',
                 subtitle: 'Manage your app preferences',
                 onTap: () {
-                  // Settings later
+                  context.push('/settings');
                 },
               ),
 

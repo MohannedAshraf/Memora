@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,6 +10,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:memora/core/theme/app-colors.dart';
 import 'package:memora/core/utils/image_picker_helper.dart';
+import 'package:memora/core/widgets/app_button.dart';
+import 'package:memora/core/widgets/app_text_field.dart';
 
 import '../bloc/profile_cubit.dart';
 import '../bloc/profile_state.dart';
@@ -23,6 +27,7 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
 
   File? _selectedImage;
 
@@ -31,11 +36,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.initState();
 
     _nameController = TextEditingController(text: widget.profile.fullName);
+
+    _emailController = TextEditingController(text: widget.profile.email);
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -46,9 +54,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _pickImage() async {
     final image = await ImagePickerHelper.pickImage();
 
-    if (image == null) {
-      return;
-    }
+    if (image == null) return;
 
     setState(() {
       _selectedImage = image;
@@ -66,7 +72,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Please enter your name')));
-
       return;
     }
 
@@ -74,7 +79,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     String? avatarPath;
 
-    // Upload new avatar if user selected one
+    // Upload new avatar if selected
     if (_selectedImage != null) {
       avatarPath = await cubit.uploadAvatar(_selectedImage!.path);
 
@@ -102,27 +107,29 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
 
+      // ==========================================================
+      // APP BAR
+      // ==========================================================
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            size: 20.sp,
-            color: AppColors.textPrimary,
-          ),
-        ),
+        centerTitle: true,
+
+        leading: BackButton(),
+
         title: Text(
           'Edit Profile',
           style: TextStyle(
-            fontSize: 21.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
         ),
       ),
 
+      // ==========================================================
+      // BODY
+      // ==========================================================
       body: BlocListener<ProfileCubit, ProfileState>(
         listener: (context, state) {
           if (state is ProfileUpdated) {
@@ -138,185 +145,293 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.all(20.w),
+
+          padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 30.h),
 
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 10.h),
+              // ====================================================
+              // PROFILE IMAGE
+              // ====================================================
+              Center(
+                child: Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        // Avatar container
+                        Container(
+                          width: 132.w,
+                          height: 132.w,
+                          padding: EdgeInsets.all(4.w),
 
-              // ==================================================
-              // AVATAR
-              // ==================================================
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(4.w),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.white,
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: CircleAvatar(
-                      radius: 60.r,
-                      backgroundColor: AppColors.surface,
-                      backgroundImage: _selectedImage != null
-                          ? FileImage(_selectedImage!)
-                          : avatarUrl != null
-                          ? NetworkImage(avatarUrl)
-                          : null,
-                      child: _selectedImage == null && avatarUrl == null
-                          ? Icon(
-                              Icons.person_outline_rounded,
-                              size: 55.sp,
-                              color: AppColors.textSecondary,
-                            )
-                          : null,
-                    ),
-                  ),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.white,
+                            border: Border.all(
+                              color: AppColors.border,
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
 
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _pickImage,
-                      borderRadius: BorderRadius.circular(20.r),
-                      child: Container(
-                        width: 40.w,
-                        height: 40.w,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.white,
-                          border: Border.all(color: AppColors.border),
+                          child: ClipOval(
+                            child: Container(
+                              color: AppColors.surface,
+
+                              child: _selectedImage != null
+                                  ? Image.file(
+                                      _selectedImage!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : avatarUrl != null
+                                  ? Image.network(
+                                      avatarUrl,
+                                      fit: BoxFit.cover,
+
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Icon(
+                                              Icons.person_outline_rounded,
+                                              size: 58.sp,
+                                              color: AppColors.textSecondary,
+                                            );
+                                          },
+                                    )
+                                  : Icon(
+                                      Icons.person_outline_rounded,
+                                      size: 58.sp,
+                                      color: AppColors.textSecondary,
+                                    ),
+                            ),
+                          ),
                         ),
-                        child: Icon(
-                          Icons.camera_alt_outlined,
-                          size: 19.sp,
-                          color: AppColors.textPrimary,
+
+                        // Camera button
+                        Material(
+                          color: Colors.transparent,
+
+                          child: InkWell(
+                            onTap: _pickImage,
+
+                            borderRadius: BorderRadius.circular(20.r),
+
+                            child: Container(
+                              width: 42.w,
+                              height: 42.w,
+
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.primary,
+                                border: Border.all(
+                                  color: AppColors.white,
+                                  width: 3,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.12),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+
+                              child: Icon(
+                                Icons.camera_alt_rounded,
+                                size: 19.sp,
+                                color: AppColors.white,
+                              ),
+                            ),
+                          ),
                         ),
+                      ],
+                    ),
+
+                    SizedBox(height: 14.h),
+
+                    Text(
+                      'Change profile photo',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
                       ),
                     ),
-                  ),
-                ],
+
+                    SizedBox(height: 4.h),
+
+                    Text(
+                      'Choose a photo from your gallery',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
-              SizedBox(height: 12.h),
+              SizedBox(height: 35.h),
+
+              // ====================================================
+              // PERSONAL INFORMATION
+              // ====================================================
+              Text(
+                'Personal Information',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+
+              SizedBox(height: 6.h),
 
               Text(
-                'Tap the camera to change your photo',
+                'Update your profile information below.',
                 style: TextStyle(
                   fontSize: 12.sp,
                   color: AppColors.textSecondary,
                 ),
               ),
 
-              SizedBox(height: 35.h),
+              SizedBox(height: 20.h),
 
-              // ==================================================
+              // ====================================================
               // FULL NAME
-              // ==================================================
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: Text(
-                  'Full Name',
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
+              // ====================================================
+              Text(
+                'Full Name',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
               ),
 
               SizedBox(height: 8.h),
 
-              TextField(
+              AppTextField(
                 controller: _nameController,
-                textInputAction: TextInputAction.done,
-                decoration: InputDecoration(
-                  hintText: 'Enter your full name',
-                  prefixIcon: const Icon(Icons.person_outline_rounded),
-                  filled: true,
-                  fillColor: AppColors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16.r),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16.r),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
+                hintText: 'Enter your full name',
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter your name';
+                  }
+
+                  return null;
+                },
+                keyboardType: TextInputType.name,
+                prefixIcon: Icon(
+                  Icons.person_outline_rounded,
+                  color: AppColors.textSecondary,
+                  size: 21.sp,
                 ),
               ),
 
-              SizedBox(height: 18.h),
+              SizedBox(height: 20.h),
 
-              // ==================================================
+              // ====================================================
               // EMAIL
-              // ==================================================
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: Text(
-                  'Email',
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+              // ====================================================
+              Text(
+                'Email Address',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+
+              SizedBox(height: 8.h),
+
+              Opacity(
+                opacity: 0.75,
+                child: AppTextField(
+                  controller: _emailController,
+                  hintText: 'Email address',
+                  validator: null,
+                  keyboardType: TextInputType.emailAddress,
+                  prefixIcon: Icon(
+                    Icons.email_outlined,
+                    color: AppColors.textSecondary,
+                    size: 21.sp,
                   ),
                 ),
               ),
 
               SizedBox(height: 8.h),
 
-              TextField(
-                readOnly: true,
-                controller: TextEditingController(text: widget.profile.email),
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16.r),
-                    borderSide: BorderSide.none,
+              Row(
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 14.sp,
+                    color: AppColors.textSecondary,
                   ),
-                ),
+
+                  SizedBox(width: 5.w),
+
+                  Expanded(
+                    child: Text(
+                      'Email address cannot be changed here.',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
               SizedBox(height: 35.h),
 
-              // ==================================================
+              // ====================================================
               // SAVE BUTTON
-              // ==================================================
+              // ====================================================
               BlocBuilder<ProfileCubit, ProfileState>(
                 builder: (context, state) {
                   final isLoading = state is ProfileUpdating;
 
-                  return SizedBox(
-                    width: double.infinity,
-                    height: 54.h,
-                    child: ElevatedButton(
-                      onPressed: isLoading ? null : _save,
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.r),
-                        ),
-                      ),
-                      child: isLoading
-                          ? SizedBox(
-                              width: 22.w,
-                              height: 22.w,
-                              child: const CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              'Save Changes',
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                    ),
+                  return AppButton(
+                    text: 'Save Changes',
+                    isLoading: isLoading,
+                    onPressed: isLoading ? null : _save,
                   );
                 },
+              ),
+
+              SizedBox(height: 12.h),
+
+              // ====================================================
+              // CANCEL BUTTON
+              // ====================================================
+              SizedBox(
+                width: double.infinity,
+                height: 50.h,
+                child: TextButton(
+                  onPressed: () => context.pop(),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.textSecondary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                  ),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

@@ -11,6 +11,7 @@ import 'package:memora/features/albums/presentation/screens/my_albums_screen.dar
 import 'package:memora/features/profile/presentation/bloc/profile_cubit.dart';
 import 'package:memora/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:memora/features/search/presentation/screens/search_screen.dart';
+import 'package:memora/features/settings/presentation/screens/settings_screen.dart';
 
 import '../../features/auth/presentation/bloc/login_cubit.dart';
 import '../../features/auth/presentation/bloc/register_cubit.dart';
@@ -97,6 +98,12 @@ GoRoute(path: '/my-albums', builder: (_, __) => const MyAlbumsScreen()),
             create: (_) => sl<ProfileCubit>(),
             child: EditProfileScreen(profile: profile),
           );
+        },
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) {
+          return const SettingsScreen();
         },
       ),
 
