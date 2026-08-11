@@ -117,7 +117,7 @@ class _AlbumMembersBody extends StatelessWidget {
 
               itemCount: state.members.length,
 
-              separatorBuilder: (_, __) => SizedBox(height: 10.h),
+              separatorBuilder: (_, _) => SizedBox(height: 10.h),
 
               itemBuilder: (context, index) {
                 final member = state.members[index];
