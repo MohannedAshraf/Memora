@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:memora/core/services/firebase_messaging_service.dart';
 import 'package:memora/core/services/media_picker_service.dart';
 import 'package:memora/features/albums/data/data_sources/add_album_members_remote_data_source.dart';
 import 'package:memora/features/albums/data/data_sources/album_details_remote_data_source.dart';
@@ -81,6 +82,10 @@ Future<void> initInjection() async {
   /// Supabase
   sl.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
 
+  sl.registerLazySingleton<FirebaseMessagingService>(
+    () => FirebaseMessagingService(),
+  );
+  
   /// Login Data Source
   sl.registerLazySingleton<LoginRemoteDataSource>(
     () => LoginRemoteDataSourceImpl(sl()),
