@@ -1,5 +1,5 @@
 abstract final class AppImages {
-  static const _baseUrl = "/images/";
+  static const _baseUrl = "assets/images/";
   static const logo = '${_baseUrl}logo.png';
 
   // static const splashBackground = 'assets/images/splash_background.png';
